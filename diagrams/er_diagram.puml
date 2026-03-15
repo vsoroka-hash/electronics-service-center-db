@@ -1,0 +1,150 @@
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowThickness 1.2
+skinparam packageStyle rectangle
+
+skinparam entity {
+  BackgroundColor #FFFDF8
+  BorderColor #16324F
+  FontColor #16324F
+}
+
+title ER Diagram - Service Center Database
+
+entity "CLIENT" as CLIENT {
+  *PK client_id : INT
+  --
+  last_name : VARCHAR(100)
+  first_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  email : VARCHAR(120)
+  registered_at : DATETIME
+}
+
+entity "DEVICE_TYPE" as DEVICE_TYPE {
+  *PK device_type_id : INT
+  --
+  type_name : VARCHAR(100)
+}
+
+entity "DEVICE" as DEVICE {
+  *PK device_id : INT
+  --
+  +FK client_id : INT
+  +FK device_type_id : INT
+  brand : VARCHAR(80)
+  model : VARCHAR(120)
+  serial_number : VARCHAR(120)
+  purchase_year : YEAR
+}
+
+entity "ORDER_STATUS" as ORDER_STATUS {
+  *PK status_id : INT
+  --
+  status_name : VARCHAR(50)
+}
+
+entity "TECHNICIAN" as TECHNICIAN {
+  *PK technician_id : INT
+  --
+  last_name : VARCHAR(100)
+  first_name : VARCHAR(100)
+  specialization : VARCHAR(120)
+  hire_date : DATE
+  phone : VARCHAR(20)
+}
+
+entity "REPAIR_ORDER" as REPAIR_ORDER {
+  *PK order_id : INT
+  --
+  +FK device_id : INT
+  +FK technician_id : INT
+  +FK status_id : INT
+  created_at : DATETIME
+  accepted_at : DATETIME
+  planned_finish_date : DATE
+  completed_at : DATETIME
+  issue_description : TEXT
+  total_amount : DECIMAL(10,2)
+  warranty_days : INT
+}
+
+entity "DIAGNOSTIC" as DIAGNOSTIC {
+  *PK diagnostic_id : INT
+  --
+  +FK order_id : INT
+  diagnostic_date : DATETIME
+  diagnostic_result : TEXT
+  estimated_cost : DECIMAL(10,2)
+  urgent_flag : BOOLEAN
+}
+
+entity "SERVICE_CATALOG" as SERVICE_CATALOG {
+  *PK service_id : INT
+  --
+  service_name : VARCHAR(150)
+  base_price : DECIMAL(10,2)
+  estimated_hours : DECIMAL(5,2)
+  is_active : BOOLEAN
+}
+
+entity "ORDER_SERVICE" as ORDER_SERVICE {
+  *PK order_service_id : INT
+  --
+  +FK order_id : INT
+  +FK service_id : INT
+  quantity : INT
+  agreed_price : DECIMAL(10,2)
+}
+
+entity "PART" as PART {
+  *PK part_id : INT
+  --
+  part_name : VARCHAR(150)
+  manufacturer : VARCHAR(100)
+  unit_price : DECIMAL(10,2)
+  quantity_in_stock : INT
+  reorder_level : INT
+}
+
+entity "ORDER_PART" as ORDER_PART {
+  *PK order_part_id : INT
+  --
+  +FK order_id : INT
+  +FK part_id : INT
+  quantity : INT
+  unit_price : DECIMAL(10,2)
+}
+
+entity "PAYMENT" as PAYMENT {
+  *PK payment_id : INT
+  --
+  +FK order_id : INT
+  payment_date : DATETIME
+  amount : DECIMAL(10,2)
+  payment_method : ENUM
+}
+
+CLIENT ||--o{ DEVICE : "1:N"
+DEVICE_TYPE ||--o{ DEVICE : "1:N"
+
+DEVICE ||--o{ REPAIR_ORDER : "1:N"
+ORDER_STATUS ||--o{ REPAIR_ORDER : "1:N"
+TECHNICIAN ||--o{ REPAIR_ORDER : "1:N"
+
+REPAIR_ORDER ||--o{ DIAGNOSTIC : "1:N"
+REPAIR_ORDER ||--o{ PAYMENT : "1:N"
+
+REPAIR_ORDER ||--o{ ORDER_SERVICE : "1:N"
+SERVICE_CATALOG ||--o{ ORDER_SERVICE : "1:N"
+
+REPAIR_ORDER ||--o{ ORDER_PART : "1:N"
+PART ||--o{ ORDER_PART : "1:N"
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowThickness 1.2
+
+skinparam rectangle {
+  BackgroundColor #FFFDF8
+  BorderColor #16324F
+  FontColor #16324F
+}
+
+title Logical Schema - Service Center Solution
+
+rectangle "User Interface\n---\nGUI application\nCLI fallback\nReporting entrypoint" as UI #D9E7F1
+
+rectangle "Application Layer\n---\nServiceCenterService\nform handling\nreport orchestration" as APP #DDEBDB
+
+rectangle "Database Access Layer\n---\nDatabase\nconnection pool\nSQL execution\nstored procedure calls" as DAL #EAD4A0
+
+rectangle "MySQL Business Logic\n---\nprocedures\ntriggers\nviews\nconstraints" as MYSQL_LOGIC #F4E9D8
+
+rectangle "Relational Data Model\n---\nclient\n device\n repair_order\n diagnostic\n payment\n order_service\n order_part\n catalogs" as MODEL #F4E9D8
+
+UI -down-> APP : actions / commands
+APP -down-> DAL : queries / mutations
+DAL -left-> MYSQL_LOGIC : procedures / rules
+DAL -right-> MODEL : read / write
+MYSQL_LOGIC -right-> MODEL : integrity enforcement
+
+@enduml
