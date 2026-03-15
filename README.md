@@ -49,6 +49,35 @@
 pip install -r requirements.txt
 ```
 
+## Windows Quick Start
+
+Швидкий сценарій запуску на Windows:
+
+1. Встановити Python 3.13+ і MySQL 8.x.
+2. Встановити залежності:
+
+```powershell
+pip install -r requirements.txt
+```
+
+3. Імпортувати структуру БД:
+
+```powershell
+mysql --default-character-set=utf8mb4 -u root -p < schema.sql
+```
+
+4. Запустити застосунок:
+
+```powershell
+python app.py
+```
+
+5. За потреби згенерувати діаграми:
+
+```powershell
+python reporting.py
+```
+
 ## Параметри підключення до БД
 
 За замовчуванням використовуються такі змінні середовища:
@@ -126,3 +155,5 @@ python reporting.py
 ## Примітка
 
 Папки `artifacts/` і `__pycache__/` не зберігаються в репозиторії, оскільки це згенеровані файли.
+
+Додаткова технічна документація винесена в папку `docs/`.
