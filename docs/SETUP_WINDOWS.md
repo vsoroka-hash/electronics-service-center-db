@@ -3,8 +3,9 @@
 ## Передумови
 
 - Windows 10 або новіше
-- Python 3.13+
+- Python 3.9+
 - MySQL Server 8.x
+- за бажанням Java, якщо потрібно рендерити `PlantUML`-діаграми локально
 
 ## Встановлення залежностей Python
 
@@ -46,4 +47,10 @@ python app.py --cli
 python reporting.py
 ```
 
-Після цього буде створено папку `artifacts/`.
+Після цього буде створено папку `artifacts/` з графіками та, за наявності Java, PNG-версіями діаграм.
+
+## Автотести
+
+```powershell
+python -m pytest -q
+```

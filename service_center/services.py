@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from typing import Optional, Union
 
 from .database import Database
 
 
 class ServiceCenterService:
-    def __init__(self, database: Database | None = None) -> None:
+    def __init__(self, database: Optional[Database] = None) -> None:
         self.database = database or Database()
 
     def list_orders(self) -> list[tuple]:
@@ -87,7 +88,7 @@ class ServiceCenterService:
             """
         )
 
-    def add_client(self, last_name: str, first_name: str, phone: str, email: str | None) -> None:
+    def add_client(self, last_name: str, first_name: str, phone: str, email: Optional[str]) -> None:
         self.database.execute(
             """
             INSERT INTO client (last_name, first_name, phone, email)
@@ -103,7 +104,7 @@ class ServiceCenterService:
         brand: str,
         model: str,
         serial_number: str,
-        purchase_year: int | None,
+        purchase_year: Optional[int],
     ) -> None:
         self.database.execute(
             """
@@ -218,7 +219,7 @@ class ServiceCenterService:
             """
         )
 
-    def dashboard_metrics(self) -> dict[str, int | float]:
+    def dashboard_metrics(self) -> dict[str, Union[int, float]]:
         counts = self.database.fetch_all(
             """
             SELECT

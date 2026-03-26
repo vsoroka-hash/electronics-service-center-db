@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import shutil
 import subprocess
+from typing import Optional
 
 import matplotlib
 
@@ -19,7 +20,7 @@ plt.rcParams["font.family"] = "DejaVu Sans"
 
 
 class ArtifactGenerator:
-    def __init__(self, database: Database | None = None, artifacts_dir: Path | None = None) -> None:
+    def __init__(self, database: Optional[Database] = None, artifacts_dir: Optional[Path] = None) -> None:
         self.database = database
         self.artifacts_dir = artifacts_dir or Path("artifacts")
         self.diagrams_dir = Path("diagrams")
@@ -144,19 +145,25 @@ class ArtifactGenerator:
         if not source.exists():
             raise FileNotFoundError(f"PlantUML source not found: {source}")
         self.ensure_dir()
-
-        plantuml_path = shutil.which("plantuml")
-        if plantuml_path:
-            command = [plantuml_path, "-tpng", "-o", str(self.artifacts_dir.resolve()), str(source.resolve())]
-        else:
-            jar_path = self.tools_dir / "plantuml.jar"
-            if not jar_path.exists():
-                raise RuntimeError("PlantUML not found. Install plantuml or place plantuml.jar in tools/plantuml.jar.")
-            command = [self._resolve_java(), "-jar", str(jar_path.resolve()), "-tpng", "-o", str(self.artifacts_dir.resolve()), str(source.resolve())]
-
-        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        generated = self.artifacts_dir / source.with_suffix(".png").name
         target = self.artifacts_dir / output_name
+
+        try:
+            plantuml_path = shutil.which("plantuml")
+            if plantuml_path:
+                command = [plantuml_path, "-tpng", "-o", str(self.artifacts_dir.resolve()), str(source.resolve())]
+            else:
+                jar_path = self.tools_dir / "plantuml.jar"
+                if not jar_path.exists():
+                    raise RuntimeError("PlantUML not found. Install plantuml or place plantuml.jar in tools/plantuml.jar.")
+                command = [self._resolve_java(), "-jar", str(jar_path.resolve()), "-tpng", "-o", str(self.artifacts_dir.resolve()), str(source.resolve())]
+
+            subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        except (FileNotFoundError, RuntimeError, subprocess.CalledProcessError):
+            if target.exists():
+                return str(target)
+            raise
+
+        generated = self.artifacts_dir / source.with_suffix(".png").name
         if generated.exists() and generated != target:
             generated.replace(target)
         output = target if target.exists() else generated
@@ -275,13 +282,20 @@ class ArtifactGenerator:
         return self._render_plantuml("logical_schema.puml", "schema_diagram.png")
 
     def generate_all(self) -> list[str]:
-        return [
-            self.generate_er_diagram(),
-            self.generate_schema_diagram(),
-            self.generate_revenue_chart(),
-            self.generate_status_chart(),
-            self.generate_technician_chart(),
+        generators = [
+            self.generate_er_diagram,
+            self.generate_schema_diagram,
+            self.generate_revenue_chart,
+            self.generate_status_chart,
+            self.generate_technician_chart,
         ]
+        generated: list[str] = []
+        for generate in generators:
+            try:
+                generated.append(generate())
+            except (FileNotFoundError, RuntimeError, subprocess.CalledProcessError):
+                continue
+        return generated
 
 
 def generate_all_artifacts() -> list[str]:

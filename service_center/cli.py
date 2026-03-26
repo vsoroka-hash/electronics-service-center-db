@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from decimal import Decimal
+from typing import Optional
 
 import mysql.connector
 
@@ -19,8 +20,8 @@ if hasattr(sys.stdin, "reconfigure"):
 class ServiceCenterCLI:
     def __init__(
         self,
-        service: ServiceCenterService | None = None,
-        artifact_generator: ArtifactGenerator | None = None,
+        service: Optional[ServiceCenterService] = None,
+        artifact_generator: Optional[ArtifactGenerator] = None,
     ) -> None:
         self.service = service or ServiceCenterService()
         self.artifact_generator = artifact_generator or ArtifactGenerator()

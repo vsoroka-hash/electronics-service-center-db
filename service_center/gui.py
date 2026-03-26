@@ -6,6 +6,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from decimal import Decimal
 from pathlib import Path
 from tkinter import messagebox, ttk
+from typing import Optional, Union
 
 import mysql.connector
 
@@ -16,8 +17,8 @@ from .visualization import ArtifactGenerator
 class ServiceCenterApp:
     def __init__(
         self,
-        service: ServiceCenterService | None = None,
-        artifact_generator: ArtifactGenerator | None = None,
+        service: Optional[ServiceCenterService] = None,
+        artifact_generator: Optional[ArtifactGenerator] = None,
     ) -> None:
         self.service = service or ServiceCenterService()
         self.artifact_generator = artifact_generator or ArtifactGenerator()
@@ -260,7 +261,7 @@ class ServiceCenterApp:
         for row in rows:
             tree.insert("", "end", values=row)
 
-    def _set_busy(self, busy: bool, message: str | None = None) -> None:
+    def _set_busy(self, busy: bool, message: Optional[str] = None) -> None:
         if busy:
             self.active_tasks += 1
         else:
@@ -278,13 +279,13 @@ class ServiceCenterApp:
         *,
         on_error=None,
         busy_message: str = "Виконується операція...",
-        success_message: str | None = None,
+        success_message: Optional[str] = None,
     ) -> None:
         self._set_busy(True, busy_message)
         future = self.executor.submit(work)
         self._poll_future(future, on_success, on_error=on_error, success_message=success_message)
 
-    def _poll_future(self, future: Future, on_success, *, on_error=None, success_message: str | None = None) -> None:
+    def _poll_future(self, future: Future, on_success, *, on_error=None, success_message: Optional[str] = None) -> None:
         if not future.done():
             self.root.after(30, lambda: self._poll_future(future, on_success, on_error=on_error, success_message=success_message))
             return
@@ -307,7 +308,7 @@ class ServiceCenterApp:
         else:
             messagebox.showerror("Помилка", str(exc), parent=self.root)
 
-    def format_money(self, value: int | float | str) -> str:
+    def format_money(self, value: Union[int, float, str]) -> str:
         return f"{float(value):,.2f} грн".replace(",", " ")
 
     def _option_pairs(self, rows: list[tuple], label_builder) -> list[str]:
